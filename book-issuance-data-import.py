@@ -1,7 +1,6 @@
 import csv
 import mysql.connector
-import datetime
-from datetime import date
+from datetime import date, datetime
 
 filename = 'MCCSS Book Issuance Form (Responses) - Form Responses 1.csv'
 
@@ -26,13 +25,22 @@ def populate_books_purchased(cursor, books_list, books_dict):
 		books_dict[book] = book_id
 
 def populate_books_distribution(reader, cursor):
-	add_book_distribution_query = 'insert into books_distribution (student_id, book_id, dist_date, created, updated) values (%s, %s, %s, %s, %s)'
+	add_book_distribution_query = 'insert into books_distribution (student_id, book_id, dist_date) values (%s, %s, %s)'
 	get_student_query = 'select id from students where family_id = %s and first_name = %s and is_active = %s'
 	family_ids_with_two_word_first_name = [42082, 73143, 41772, 92539, 60480, 97937]
 	problem_record_count = 0
 
+	get_all_books = 'select id, title from books_purchased'
+	cursor.execute(get_all_books)
+	rows = cursor.fetchall()
+	books_dict = dict()
+	for row in rows:
+		books_dict[rows[1]] = row[0]
+		print 'Book ID:', row[0], 'and Book Name:', row[1]
+
 	for row in reader:
 		family_id = int(row['Family ID'])
+		student_id = -1
 		
 		name = row['Student Name'].split()
 		books = row['Books Issued'].split()
@@ -63,6 +71,14 @@ def populate_books_distribution(reader, cursor):
 		else:
 			for row in rows:
 				print 'Student Record Found: ', row[0]
+				student_id = int(row[0])
+
+		#Insert student and book info in the book distribution table
+		#for book in books:
+
+
+		
+
 
 	print "Total Problem Records:", problem_record_count
 
